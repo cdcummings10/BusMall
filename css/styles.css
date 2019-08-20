@@ -1,0 +1,63 @@
+/* * {
+  outline: dotted lightsalmon 1px;
+} */
+
+.clearfix:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+body > header {
+  background-color: darkblue;
+  color: ivory;
+  height: 100px;
+  line-height: 100px;
+  text-align: center;
+}
+
+h1 {
+  font-size: 3em;
+  font-family: 'Bitter', serif;
+}
+
+h2 {
+  font-family: 'Asap', sans-serif;
+  font-size: 1.5em;
+  margin-top: 30px;
+  text-align: center;
+}
+
+#image_banner {
+  margin: 30px auto;
+  width: 960px;
+}
+
+#image_banner figure {
+  border: 2px #222 solid;
+  box-sizing: border-box;
+  float: left;
+  height: 300px;
+  margin: 10px;
+  cursor: pointer;
+  position: relative;
+  width: 300px;
+}
+
+#image_banner figure img {
+  width: 100%;
+}
+
+#image_banner figcaption {
+  background-color: lightblue;
+  border-top: 2px #222 solid;
+  bottom: 0;
+  font-family: 'Asap', sans-serif;
+  font-size: 1.5em;
+  font-weight: bold;
+  left: 0;
+  line-height: 1.5em;
+  position: absolute;
+  text-align: center;
+  width: 100%;
+}
