@@ -47,6 +47,10 @@ var imageNames = [
 ];
 
 var imageSection = document.getElementById('image_banner');
+var repeatCheckArray = [];
+var figuresArray = [];
+var scoresArray = [];
+var numberOfLoops = 0;
 
 function Images( name, url ) {
   this.name = name;
@@ -68,11 +72,6 @@ function chooseRandomImage(){
   return Images.list[randomImage];
 }
 
-var repeatCheckArray = [];
-var figuresArray = [];
-var scoresArray = [];
-var numberOfLoops = 0;
-createImages();
 function renderRandomImage(){
   removePreviousImages();
   if (numberOfLoops < 25){
@@ -107,18 +106,23 @@ function renderRandomImage(){
     numberOfLoops++;
   }
   else {
-    var elUl = document.createElement('ul');
-    elUl.textContent = 'Totals:';
-    for (var j = 0; j < Images.list.length; j++){
-      var elLi = document.createElement('li');
-      elLi.textContent = Images.list[j].votes + ' votes for the ' + Images.list[j].name;
-      elUl.appendChild(elLi);
-    }
-    imageSection.appendChild(elUl);
+    var elH2 = document.getElementsByTagName('h2')[0];
+    elH2.textContent = 'Totals Chart';
+    // listTotals();
+    createChart();
   }
 }
-renderRandomImage();
 
+function listTotals(){
+  var elUl = document.createElement('ul');
+  elUl.textContent = 'Totals:';
+  for (var j = 0; j < Images.list.length; j++){
+    var elLi = document.createElement('li');
+    elLi.textContent = Images.list[j].votes + ' votes for the ' + Images.list[j].name;
+    elUl.appendChild(elLi);
+  }
+  imageSection.appendChild(elUl);
+}
 
 function chosenOne(){
   scoresArray[0].votes++;
@@ -133,10 +137,103 @@ function chosenThree(){
   renderRandomImage();
 }
 
-
 function removePreviousImages (){
   while (imageSection.firstChild){
     imageSection.removeChild(imageSection.firstChild);
   }
 }
+
+function totalVotesToArray(){
+  var totalsArray = [];
+  for(var i = 0; i < Images.list.length; i++){
+    totalsArray.push(Images.list[i].votes);
+  }
+  return totalsArray;
+}
+function totalViewsToArray(){
+  var totalsArray = [];
+  for(var i = 0; i < Images.list.length; i++){
+    totalsArray.push(Images.list[i].shown);
+  }
+  return totalsArray;
+}
+function percentagePickedToArray(){
+  var totalsArray = [];
+  for(var i = 0; i < Images.list.length; i++){
+    var percent = Images.list[i].votes / Images.list[i].shown * 100;
+    totalsArray.push(percent);
+  }
+  return totalsArray;
+}
+
+function createChart(){
+  var elChart = document.createElement('canvas');
+  elChart.id = 'totals_chart';
+  imageSection.appendChild(elChart);
+
+  //code from https://www.chartjs.org/docs/latest/getting-started/
+  var ctx = document.getElementById('totals_chart').getContext('2d');
+  var chart = new Chart(ctx, {
+    // The type of chart we want to create
+    type: 'bar',
+
+    // The data for our dataset
+    data: {
+      labels: imageNames,
+      datasets: [
+        {
+          label: 'Percentage Chosen',
+          borderColor: 'black',
+          data: percentagePickedToArray(),
+          type: 'bar',
+          yAxisID: 'right-y-axis',
+        },
+        {
+          label: 'Total Votes',
+          backgroundColor: 'rgb(255, 99, 132)',
+          borderColor: 'rgb(255, 99, 132)',
+          data: totalVotesToArray(),
+          yAxisID: 'left-y-axis',
+        },
+        {
+          label: 'Total Times Shown',
+          backgroundColor: 'blue',
+          borderColor: 'rgb(255, 99, 132)',
+          data: totalViewsToArray(),
+          yAxisID: 'left-y-axis',
+        },
+      ]
+      
+    },
+
+    // Configuration options go here
+    options: {
+      scales: {
+        yAxes: [{
+          id: 'left-y-axis',
+          type: 'linear',
+          position: 'left',
+          scaleLabel: {
+            display: true,
+            labelString: 'Number of Votes',
+          }
+        }, {
+          id: 'right-y-axis',
+          type: 'linear',
+          position: 'right',
+          scaleLabel: {
+            display: true,
+            labelString: 'Percentage Chosen',
+          },
+          ticks: {
+            max: 100,
+          }
+        }]
+      }
+    }
+  });
+}
+
+createImages();
+renderRandomImage();
 
