@@ -42,6 +42,7 @@ h2 {
   cursor: pointer;
   position: relative;
   width: 300px;
+  transition: 1s all;
 }
 
 #image_banner figure img {

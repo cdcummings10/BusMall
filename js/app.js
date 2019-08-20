@@ -48,7 +48,6 @@ var imageNames = [
 
 var imageSection = document.getElementById('image_banner');
 var repeatCheckArray = [];
-var figuresArray = [];
 var scoresArray = [];
 var numberOfLoops = 0;
 
@@ -80,60 +79,48 @@ function renderRandomImage(){
       while(repeatCheckArray.includes(randomImage)){
         randomImage = chooseRandomImage();
       }
-      
+      createImageElement(randomImage);
       scoresArray[i] = randomImage;
       randomImage.shown++;
-      var newFigure = document.createElement('figure');
-      var newImg = document.createElement('img');
-      var newCaption = document.createElement('figcaption');
-      
-      newImg.src = randomImage.src;
-      newCaption.textContent = randomImage.name;
-      newFigure.appendChild(newImg);
-      newFigure.appendChild(newCaption);
-      imageSection.appendChild(newFigure);
       repeatCheckArray.push(randomImage);
-      figuresArray.push(newFigure);
     }
-    if(repeatCheckArray.length >= 6){
-      repeatCheckArray.shift();
-      repeatCheckArray.shift();
-      repeatCheckArray.shift();
-    }
-    document.getElementsByTagName('figure')[0].addEventListener('click', chosenOne);
-    document.getElementsByTagName('figure')[1].addEventListener('click', chosenTwo);
-    document.getElementsByTagName('figure')[2].addEventListener('click', chosenThree);
+    removeThreePreviousImages();
     numberOfLoops++;
   }
   else {
-    var elH2 = document.getElementsByTagName('h2')[0];
-    elH2.textContent = 'Totals Chart';
     // listTotals();
     createChart();
   }
 }
 
-function listTotals(){
-  var elUl = document.createElement('ul');
-  elUl.textContent = 'Totals:';
-  for (var j = 0; j < Images.list.length; j++){
-    var elLi = document.createElement('li');
-    elLi.textContent = Images.list[j].votes + ' votes for the ' + Images.list[j].name;
-    elUl.appendChild(elLi);
-  }
-  imageSection.appendChild(elUl);
+function createImageElement(randomImage){
+  var newFigure = document.createElement('figure');
+  var newImg = document.createElement('img');
+  var newCaption = document.createElement('figcaption');
+  
+  newImg.src = randomImage.src;
+  newImg.alt = randomImage.name;
+  newCaption.textContent = randomImage.name;
+  newFigure.appendChild(newImg);
+  newFigure.appendChild(newCaption);
+  imageSection.appendChild(newFigure);
 }
 
-function chosenOne(){
-  scoresArray[0].votes++;
-  renderRandomImage();
+function removeThreePreviousImages(){
+  if(repeatCheckArray.length >= 6){
+    repeatCheckArray.shift();
+    repeatCheckArray.shift();
+    repeatCheckArray.shift();
+  }
 }
-function chosenTwo(){
-  scoresArray[1].votes++;
-  renderRandomImage();
-}
-function chosenThree(){
-  scoresArray[2].votes++;
+
+function imageVotedFor(e){
+  var clicked = e.target.alt;
+  for (var i = 0; i < Images.list.length; i++){
+    if (Images.list[i].name === clicked){
+      Images.list[i].votes++;
+    }
+  }
   renderRandomImage();
 }
 
@@ -166,28 +153,34 @@ function percentagePickedToArray(){
   return totalsArray;
 }
 
+function listTotals(){
+  var elUl = document.createElement('ul');
+  elUl.textContent = 'Totals:';
+  for (var j = 0; j < Images.list.length; j++){
+    var elLi = document.createElement('li');
+    elLi.textContent = Images.list[j].votes + ' votes for the ' + Images.list[j].name;
+    elUl.appendChild(elLi);
+  }
+  imageSection.appendChild(elUl);
+}
+
 function createChart(){
+  var elH2 = document.getElementsByTagName('h2')[0];
+  elH2.textContent = 'Total Votes Compared to Times Shown Chart';
   var elChart = document.createElement('canvas');
   elChart.id = 'totals_chart';
   imageSection.appendChild(elChart);
-
+  
   //code from https://www.chartjs.org/docs/latest/getting-started/
   var ctx = document.getElementById('totals_chart').getContext('2d');
   var chart = new Chart(ctx, {
     // The type of chart we want to create
     type: 'bar',
-
+    
     // The data for our dataset
     data: {
       labels: imageNames,
       datasets: [
-        {
-          label: 'Percentage Chosen',
-          borderColor: 'black',
-          data: percentagePickedToArray(),
-          type: 'bar',
-          yAxisID: 'right-y-axis',
-        },
         {
           label: 'Total Votes',
           backgroundColor: 'rgb(255, 99, 132)',
@@ -202,10 +195,16 @@ function createChart(){
           data: totalViewsToArray(),
           yAxisID: 'left-y-axis',
         },
+        {
+          label: 'Percentage Chosen',
+          backgroundColor: 'goldenrod',
+          data: percentagePickedToArray(),
+          type: 'bar',
+          yAxisID: 'right-y-axis',
+        },
       ]
-      
     },
-
+    
     // Configuration options go here
     options: {
       scales: {
@@ -234,6 +233,7 @@ function createChart(){
   });
 }
 
+imageSection.addEventListener('click', imageVotedFor);
 createImages();
 renderRandomImage();
 
