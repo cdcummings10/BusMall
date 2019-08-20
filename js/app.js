@@ -47,6 +47,9 @@ var imageNames = [
 ];
 
 var imageSection = document.getElementById('image_banner');
+var repeatCheckArray = [];
+var scoresArray = [];
+var numberOfLoops = 0;
 
 function Images( name, url ) {
   this.name = name;
@@ -68,11 +71,6 @@ function chooseRandomImage(){
   return Images.list[randomImage];
 }
 
-var repeatCheckArray = [];
-var figuresArray = [];
-var scoresArray = [];
-var numberOfLoops = 0;
-createImages();
 function renderRandomImage(){
   removePreviousImages();
   if (numberOfLoops < 25){
@@ -81,62 +79,161 @@ function renderRandomImage(){
       while(repeatCheckArray.includes(randomImage)){
         randomImage = chooseRandomImage();
       }
-      
+      createImageElement(randomImage);
       scoresArray[i] = randomImage;
       randomImage.shown++;
-      var newFigure = document.createElement('figure');
-      var newImg = document.createElement('img');
-      var newCaption = document.createElement('figcaption');
-      
-      newImg.src = randomImage.src;
-      newCaption.textContent = randomImage.name;
-      newFigure.appendChild(newImg);
-      newFigure.appendChild(newCaption);
-      imageSection.appendChild(newFigure);
       repeatCheckArray.push(randomImage);
-      figuresArray.push(newFigure);
     }
-    if(repeatCheckArray.length >= 6){
-      repeatCheckArray.shift();
-      repeatCheckArray.shift();
-      repeatCheckArray.shift();
-    }
-    document.getElementsByTagName('figure')[0].addEventListener('click', chosenOne);
-    document.getElementsByTagName('figure')[1].addEventListener('click', chosenTwo);
-    document.getElementsByTagName('figure')[2].addEventListener('click', chosenThree);
+    removeThreePreviousImages();
     numberOfLoops++;
   }
   else {
-    var elUl = document.createElement('ul');
-    elUl.textContent = 'Totals:';
-    for (var j = 0; j < Images.list.length; j++){
-      var elLi = document.createElement('li');
-      elLi.textContent = Images.list[j].votes + ' votes for the ' + Images.list[j].name;
-      elUl.appendChild(elLi);
-    }
-    imageSection.appendChild(elUl);
+    // listTotals();
+    createChart();
   }
 }
-renderRandomImage();
 
-
-function chosenOne(){
-  scoresArray[0].votes++;
-  renderRandomImage();
-}
-function chosenTwo(){
-  scoresArray[1].votes++;
-  renderRandomImage();
-}
-function chosenThree(){
-  scoresArray[2].votes++;
-  renderRandomImage();
+function createImageElement(randomImage){
+  var newFigure = document.createElement('figure');
+  var newImg = document.createElement('img');
+  var newCaption = document.createElement('figcaption');
+  
+  newImg.src = randomImage.src;
+  newImg.alt = randomImage.name;
+  newCaption.textContent = randomImage.name;
+  newFigure.appendChild(newImg);
+  newFigure.appendChild(newCaption);
+  imageSection.appendChild(newFigure);
 }
 
+function removeThreePreviousImages(){
+  if(repeatCheckArray.length >= 6){
+    repeatCheckArray.shift();
+    repeatCheckArray.shift();
+    repeatCheckArray.shift();
+  }
+}
+
+function imageVotedFor(e){
+  var clicked = e.target.alt;
+  for (var i = 0; i < Images.list.length; i++){
+    if (Images.list[i].name === clicked){
+      Images.list[i].votes++;
+    }
+  }
+  renderRandomImage();
+}
 
 function removePreviousImages (){
   while (imageSection.firstChild){
     imageSection.removeChild(imageSection.firstChild);
   }
 }
+
+function totalVotesToArray(){
+  var totalsArray = [];
+  for(var i = 0; i < Images.list.length; i++){
+    totalsArray.push(Images.list[i].votes);
+  }
+  return totalsArray;
+}
+function totalViewsToArray(){
+  var totalsArray = [];
+  for(var i = 0; i < Images.list.length; i++){
+    totalsArray.push(Images.list[i].shown);
+  }
+  return totalsArray;
+}
+function percentagePickedToArray(){
+  var totalsArray = [];
+  for(var i = 0; i < Images.list.length; i++){
+    var percent = Images.list[i].votes / Images.list[i].shown * 100;
+    totalsArray.push(percent);
+  }
+  return totalsArray;
+}
+
+function listTotals(){
+  var elUl = document.createElement('ul');
+  elUl.textContent = 'Totals:';
+  for (var j = 0; j < Images.list.length; j++){
+    var elLi = document.createElement('li');
+    elLi.textContent = Images.list[j].votes + ' votes for the ' + Images.list[j].name;
+    elUl.appendChild(elLi);
+  }
+  imageSection.appendChild(elUl);
+}
+
+function createChart(){
+  var elH2 = document.getElementsByTagName('h2')[0];
+  elH2.textContent = 'Total Votes Compared to Times Shown Chart';
+  var elChart = document.createElement('canvas');
+  elChart.id = 'totals_chart';
+  imageSection.appendChild(elChart);
+  
+  //code from https://www.chartjs.org/docs/latest/getting-started/
+  var ctx = document.getElementById('totals_chart').getContext('2d');
+  var chart = new Chart(ctx, {
+    // The type of chart we want to create
+    type: 'bar',
+    
+    // The data for our dataset
+    data: {
+      labels: imageNames,
+      datasets: [
+        {
+          label: 'Total Votes',
+          backgroundColor: 'rgb(255, 99, 132)',
+          borderColor: 'rgb(255, 99, 132)',
+          data: totalVotesToArray(),
+          yAxisID: 'left-y-axis',
+        },
+        {
+          label: 'Total Times Shown',
+          backgroundColor: 'blue',
+          borderColor: 'rgb(255, 99, 132)',
+          data: totalViewsToArray(),
+          yAxisID: 'left-y-axis',
+        },
+        {
+          label: 'Percentage Chosen',
+          backgroundColor: 'goldenrod',
+          data: percentagePickedToArray(),
+          type: 'bar',
+          yAxisID: 'right-y-axis',
+        },
+      ]
+    },
+    
+    // Configuration options go here
+    options: {
+      scales: {
+        yAxes: [{
+          id: 'left-y-axis',
+          type: 'linear',
+          position: 'left',
+          scaleLabel: {
+            display: true,
+            labelString: 'Number of Votes',
+          }
+        }, {
+          id: 'right-y-axis',
+          type: 'linear',
+          position: 'right',
+          scaleLabel: {
+            display: true,
+            labelString: 'Percentage Chosen',
+          },
+          ticks: {
+            max: 100,
+          }
+        }]
+      }
+    }
+  });
+}
+
+imageSection.addEventListener('click', imageVotedFor);
+createImages();
+renderRandomImage();
 
