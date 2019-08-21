@@ -66,6 +66,25 @@ function createImages() {
   }
 }
 
+function loadSavedData() {
+  var savedVotes = JSON.parse(localStorage.getItem('votes'));
+  var savedShown = JSON.parse(localStorage.getItem('shown'));
+  console.log(savedVotes);
+  if (savedVotes){
+    for(var i = 0; i <savedVotes.length; i++){
+      Images.list[i].votes += savedVotes[i];
+      Images.list[i].shown += savedShown[i];
+    }
+  }
+}
+
+function saveData(){
+  var votes = JSON.stringify(totalVotesToArray());
+  var shown = JSON.stringify(totalViewsToArray());
+  localStorage.setItem('votes', votes);
+  localStorage.setItem('shown', shown);
+}
+
 function chooseRandomImage(){
   var randomImage = Math.floor(Math.random() * Images.list.length);
   return Images.list[randomImage];
@@ -90,6 +109,7 @@ function renderRandomImage(){
   else {
     // listTotals();
     createChart();
+    saveData();
   }
 }
 
@@ -232,8 +252,8 @@ function createChart(){
     }
   });
 }
-
 imageSection.addEventListener('click', imageVotedFor);
 createImages();
+loadSavedData();
 renderRandomImage();
 
