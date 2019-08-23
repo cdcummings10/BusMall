@@ -47,6 +47,7 @@ h2 {
 
 #image_banner figure img {
   width: 100%;
+  height: 100%;
 }
 
 #image_banner figcaption {
@@ -60,5 +61,14 @@ h2 {
   line-height: 1.5em;
   position: absolute;
   text-align: center;
+  width: 100%;
+}
+
+footer {
+  position: absolute;
+  bottom: 0px;
+  line-height: 2em;
+  background: lightslategray;
+  display: block;
   width: 100%;
 }

@@ -110,6 +110,8 @@ function renderRandomImage(){
     // listTotals();
     createChart();
     saveData();
+    imageSection.removeEventListener();
+
   }
 }
 
